@@ -10,9 +10,9 @@ const PORT = 5000;
 
 // 1) Map each property to a different recipient email
 const propertyEmailMap = {
-  'Property 1': 'Nfurrier@picor.com',
-  'Property 2': 'Gfurrier@picor.com',
-  'Property 3': 'Highspeedmitch@gmail.com',
+  'San Clemente': 'Nfurrier@picor.com',
+  'Broadway Center': 'Gfurrier@picor.com',
+  '22 & Harrison': 'Highspeedmitch@gmail.com',
 };
 
 // Temporary storage: in a real app, store in DB
@@ -32,8 +32,7 @@ app.post('/submit-form', async (req, res) => {
       fireSafetyMeasures,
       securitySystems,
       maintenanceSchedule,
-      // read selectedProperty if you want to do additional checks
-      selectedProperty
+      selectedProperty,
     } = data;
 
     // Validate required fields
@@ -68,7 +67,7 @@ app.get('/download-pdf', async (req, res) => {
   try {
     if (!lastSubmission) {
       return res.status(400).json({
-        message: 'No form submission found. Please submit the form first.'
+        message: 'No form submission found. Please submit the form first.',
       });
     }
 
@@ -83,8 +82,9 @@ app.get('/download-pdf', async (req, res) => {
       fs.mkdirSync(pdfStorageDir, { recursive: true });
     }
 
-    // 4) Generate a unique file name
-    const fileName = `checklist-${Date.now()}.pdf`;
+    // 4) Generate a unique file name with `Date()` string
+    const dateString = new Date().toISOString().replace(/[:.]/g, '-'); // ISO format for filenames
+    const fileName = `checklist-${dateString}.pdf`;
 
     // 5) Combine the directory and file name into a full path
     const filePath = path.join(pdfStorageDir, fileName);
@@ -105,39 +105,37 @@ app.get('/download-pdf', async (req, res) => {
       console.log(`PDF saved at: ${filePath}`);
 
       // Determine which property was selected in the submission
-      const { selectedProperty } = lastSubmission;  // e.g. "Property 1"
+      const { selectedProperty } = lastSubmission;
       console.log('Selected Property:', selectedProperty);
 
-      // Use the map to find the correct recipient
-      // default email if property not in map
+      // Use the map to find the correct recipient, defaulting to a fallback email
       const recipientEmail = propertyEmailMap[selectedProperty] || 'highspeedmitch@gmail.com';
-
       console.log(`Email will be sent to: ${recipientEmail}`);
 
-      // 8a) Create Nodemailer transporter
+      // Create Nodemailer transporter
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
           user: 'highspeedmitch@gmail.com',
-          pass: 'tevt ennm rldu azeh', // for Gmail 2FA, use an App Password
+          pass: 'tevt ennm rldu azeh', // Gmail App Password
         },
       });
 
-      // 8b) Define mail options
+      // Define mail options with the date in the subject line
       const mailOptions = {
         from: 'highspeedmitch@gmail.com',
-        to: recipientEmail, 
-        subject: `Your Checklist PDF for ${selectedProperty || 'Unknown Property'}`,
-        text: `Hello! Attached is the PDF for ${selectedProperty}.`,
+        to: recipientEmail,
+        subject: `Checklist PDF for ${selectedProperty || 'Unknown Property'} - Submitted on ${new Date().toLocaleString()}`,
+        text: `Hello! Attached is the checklist PDF for ${selectedProperty}, submitted on ${new Date().toLocaleString()}.`,
         attachments: [
           {
-            filename: fileName,  // The same name we used for the file
-            path: filePath,      // Full path to the saved PDF
+            filename: fileName, // The same name we used for the file
+            path: filePath, // Full path to the saved PDF
           },
         ],
       };
 
-      // 8c) Send the email
+      // Send the email
       try {
         const info = await transporter.sendMail(mailOptions);
         console.log(`Email sent to ${recipientEmail}:`, info.response);
@@ -169,9 +167,9 @@ app.get('/download-pdf', async (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     message: 'Something broke!',
-    success: false 
+    success: false,
   });
 });
 

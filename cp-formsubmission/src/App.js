@@ -94,22 +94,22 @@ function MobileFriendlyApp() {
         <h1 style={styles.heading}>Select a Property</h1>
         <div style={styles.propertyBoxContainer}>
           <div
-            onClick={() => setSelectedProperty('Property 1')}
+            onClick={() => setSelectedProperty('San Clemente')}
             style={styles.propertyBox}
           >
-            Property 1
+            San Clemente
           </div>
           <div
-            onClick={() => setSelectedProperty('Property 2')}
+            onClick={() => setSelectedProperty('Broadway Center')}
             style={styles.propertyBox}
           >
-            Property 2
+            Broadway Center
           </div>
           <div
-            onClick={() => setSelectedProperty('Property 3')}
+            onClick={() => setSelectedProperty('22 & Harrison')}
             style={styles.propertyBox}
           >
-            Property 3
+            22 & Harrison
           </div>
         </div>
       </div>
